@@ -7,7 +7,6 @@ import { fetchCalendarResults } from '../utils/api'
 import { Agenda } from 'react-native-calendars'
 import DateHeader from './DateHeader'
 import { white } from '../utils/colors'
-require('../utils/dateFormat')
 
 export default function History () {
   const [state, setState] = useState({
