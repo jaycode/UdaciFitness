@@ -10,6 +10,7 @@ import { submitEntry, removeEntry } from '../utils/api'
 import { useDispatch, useSelector } from 'react-redux'
 import { addEntry } from '../actions'
 import { white, purple } from '../utils/colors'
+import { CommonActions } from '@react-navigation/native'
 
 function SubmitBtn ({ onPress }) {
   return (
@@ -32,9 +33,10 @@ export default function AddEntry (props) {
   const dispatch = useDispatch()
   let curState = useSelector(_state => {
     const key = timeToString()
-
+    console.log(`_state[${key}]`)
+    console.log(_state[key])
     return {
-      alreadyLogged: _state[key] && typeof _state[key].today === 'undefined'
+      alreadyLogged: _state[key] && typeof _state[key][0] === 'undefined'
     }
   })
 
@@ -86,7 +88,7 @@ export default function AddEntry (props) {
       eat: 0
     }))
 
-    // Navigate to home
+    toHome()
 
     submitEntry({ key, entry })
 
@@ -97,12 +99,19 @@ export default function AddEntry (props) {
     const key = timeToString()
 
     dispatch(addEntry({
-      [key]: getDailyReminderValue()
+      [key]: [getDailyReminderValue()]
     }))
 
-    // Route to Home
+    toHome()
 
     removeEntry(key)
+  }
+
+  const toHome = () => {
+    props.navigation.dispatch({
+      ...CommonActions.goBack(),
+      source: 'AddEntry'
+    })
   }
 
   const metaInfo = getMetricMetaInfo()

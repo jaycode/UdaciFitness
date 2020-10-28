@@ -7,17 +7,19 @@ import { fetchCalendarResults } from '../utils/api'
 import { Agenda } from 'react-native-calendars'
 import DateHeader from './DateHeader'
 import { white } from '../utils/colors'
+import MetricCard from './MetricCard'
+import { AppLoading } from 'expo'
 
-export default function History () {
+export default function History (props) {
   const [state, setState] = useState({
     entries: [],
-    ready: false,
-    selectedDate: new Date().toISOString().slice(0, 10),
+    ready: false
   })
 
   const entries = useSelector(_state => {
     return _state
   })
+
   const dispatch = useDispatch()
   useEffect(() => {
     fetchCalendarResults()
@@ -34,13 +36,13 @@ export default function History () {
 
   const onDayPress = (day) => {
     setState({
-      ...state,
-      selectedDate: day.dateString
+      ...state
     })
   };
 
   const renderItem = ({ today, ...metrics }, firstItemInDay, date) => {
-    const formattedDate = date.toString("MMMM d, yyyy")
+    const formattedDate = date !== undefined ? date.toString("MMMM d, yyyy") : null
+    const key = date.toString("yyyy-MM-dd")
     return (
       <View style={styles.item}>
         {today
@@ -50,9 +52,12 @@ export default function History () {
                 {today}
               </Text>
             </View>
-          : <TouchableOpacity onPress={() => console.log('Pressed!')}>
-              <DateHeader date={formattedDate} />
-              <Text>{JSON.stringify(metrics)}</Text>
+          : <TouchableOpacity onPress={() =>
+              props.navigation.navigate(
+                'EntryDetail',
+                { entryId: key }
+              )}>
+              <MetricCard metrics={metrics} date={formattedDate} />
             </TouchableOpacity>
         }
       </View>
@@ -70,17 +75,20 @@ export default function History () {
       </View>
     )
   }
+
+  const { ready } = state
+
+  if (ready === false) {
+    return <AppLoading />
+  }
+  console.log("entries")
+  console.log(entries)
   return (
     <Agenda
       items={entries}
       onDayPress={onDayPress}
-      // renderItem={(item, firstItemInDay) =>
-      //   renderItem(state.selectedDate, item, firstItemInDay)}
       renderItem={renderItem}
-      // renderDay={(day, item) => {return <View><Text>Day</Text></View>}}
-      renderEmptyDate={(dateKey) => {
-        return renderEmptyDate(dateKey)
-      }}
+      renderEmptyDate={renderEmptyDate}
     />
   )
 }
